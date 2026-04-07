@@ -2,8 +2,13 @@
 import argparse
 import json
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
+
+
+RG_PATH = shutil.which("rg")
 
 
 def parse_args():
@@ -69,6 +74,75 @@ def extract_h1(body: str):
 
 def tokenize(query: str):
     return [token for token in re.findall(r"[a-z0-9]+", query.lower()) if len(token) > 1]
+
+
+def list_markdown_files(search_root: Path):
+    if RG_PATH:
+        proc = subprocess.run(
+            [RG_PATH, "--files", str(search_root), "-g", "*.md"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode == 0:
+            return sorted(Path(line) for line in proc.stdout.splitlines() if line.strip())
+
+    return sorted(search_root.rglob("*.md"))
+
+
+def rg_matching_files(search_root: Path, pattern: str):
+    if not RG_PATH or not pattern:
+        return set()
+
+    proc = subprocess.run(
+        [
+            RG_PATH,
+            "--files-with-matches",
+            "--ignore-case",
+            "--fixed-strings",
+            "--glob",
+            "*.md",
+            pattern,
+            ".",
+        ],
+        cwd=search_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode not in (0, 1):
+        return set()
+
+    return {
+        (search_root / line).resolve()
+        for line in proc.stdout.splitlines()
+        if line.strip()
+    }
+
+
+def shortlist_candidate_files(search_root: Path, query: str, tokens):
+    paths = list_markdown_files(search_root)
+    if not paths or not RG_PATH:
+        return paths
+
+    phrase = query.lower().strip()
+    candidates = set()
+
+    for path in paths:
+        rel_lower = str(path.relative_to(search_root)).lower()
+        if phrase and phrase in rel_lower:
+            candidates.add(path.resolve())
+            continue
+        if any(token in rel_lower for token in tokens):
+            candidates.add(path.resolve())
+
+    for pattern in ([query] if phrase else []) + tokens:
+        candidates.update(rg_matching_files(search_root, pattern))
+
+    if not candidates:
+        return []
+
+    return sorted(path for path in paths if path.resolve() in candidates)
 
 
 def score_file(path: Path, knowledge_dir: Path, query: str, tokens):
@@ -154,7 +228,7 @@ def main():
     tokens = tokenize(args.query)
     results = []
     for search_root in search_roots:
-        for path in sorted(search_root.rglob("*.md")):
+        for path in shortlist_candidate_files(search_root, args.query, tokens):
             item = score_file(path, knowledge_dir, args.query, tokens)
             if item:
                 results.append(item)
