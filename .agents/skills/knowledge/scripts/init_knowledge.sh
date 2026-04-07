@@ -6,18 +6,20 @@ usage() {
 Scaffold a repo-local `.knowledge` folder for the three-layer second-brain model.
 
 Usage:
-  bash scripts/init_knowledge.sh [--path DIR] [--force-managed] [--dry-run]
+  bash scripts/init_knowledge.sh [--path DIR] [--force-managed] [--dry-run] [--json]
 
 Options:
   --path DIR        Parent directory that will contain `.knowledge` (default: current directory)
   --force-managed   Rewrite starter files owned by this script
   --dry-run         Print planned changes without writing files
+  --json            Write the final summary as JSON to stdout
   --help            Show this help
 
 Examples:
   bash scripts/init_knowledge.sh
   bash scripts/init_knowledge.sh --path /repo/root --dry-run
   bash scripts/init_knowledge.sh --path /repo/root --force-managed
+  bash scripts/init_knowledge.sh --path /repo/root --json
 EOF
 }
 
@@ -28,6 +30,7 @@ log() {
 target_root="."
 force_managed=0
 dry_run=0
+json_output=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -45,6 +48,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --dry-run)
       dry_run=1
+      shift
+      ;;
+    --json)
+      json_output=1
       shift
       ;;
     --help|-h)
@@ -70,6 +77,7 @@ knowledge_dir="$target_root/.knowledge"
 created_dirs=0
 written_files=0
 skipped_files=0
+declare -A planned_dirs=()
 
 ensure_dir() {
   local path="$1"
@@ -78,7 +86,12 @@ ensure_dir() {
     return 0
   fi
 
+  if [[ "$dry_run" -eq 1 && -n "${planned_dirs[$path]:-}" ]]; then
+    return 0
+  fi
+
   if [[ "$dry_run" -eq 1 ]]; then
+    planned_dirs["$path"]=1
     log "would create dir $path"
   else
     mkdir -p "$path"
@@ -384,8 +397,36 @@ Use this note as the entry point into the knowledge layer.
 - Add link context whenever you connect notes.
 EOF
 
-printf 'mode=%s\n' "$([[ "$dry_run" -eq 1 ]] && printf 'dry-run' || printf 'apply')"
-printf 'knowledge_dir=%s\n' "$knowledge_dir"
-printf 'created_dirs=%s\n' "$created_dirs"
-printf 'written_files=%s\n' "$written_files"
-printf 'skipped_files=%s\n' "$skipped_files"
+mode="$([[ "$dry_run" -eq 1 ]] && printf 'dry-run' || printf 'apply')"
+
+if [[ "$json_output" -eq 1 ]]; then
+  MODE="$mode" \
+  KNOWLEDGE_DIR="$knowledge_dir" \
+  CREATED_DIRS="$created_dirs" \
+  WRITTEN_FILES="$written_files" \
+  SKIPPED_FILES="$skipped_files" \
+  python3 - <<'PY'
+import json
+import os
+
+print(
+    json.dumps(
+        {
+            "mode": os.environ["MODE"],
+            "knowledge_dir": os.environ["KNOWLEDGE_DIR"],
+            "created_dirs": int(os.environ["CREATED_DIRS"]),
+            "written_files": int(os.environ["WRITTEN_FILES"]),
+            "skipped_files": int(os.environ["SKIPPED_FILES"]),
+        },
+        indent=2,
+        sort_keys=True,
+    )
+)
+PY
+else
+  printf 'mode=%s\n' "$mode"
+  printf 'knowledge_dir=%s\n' "$knowledge_dir"
+  printf 'created_dirs=%s\n' "$created_dirs"
+  printf 'written_files=%s\n' "$written_files"
+  printf 'skipped_files=%s\n' "$skipped_files"
+fi

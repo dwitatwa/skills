@@ -1,0 +1,69 @@
+{
+  "skill_name": "knowledge",
+  "evals": [
+    {
+      "id": "fresh_scaffold",
+      "prompt": "Use $knowledge to create a repo-local .knowledge folder for a new project so I have sources, knowledge, and rules layers with starter note templates.",
+      "expected_output": "A new .knowledge tree exists with the managed starter files and templates, and the validator accepts it.",
+      "assertions": [
+        "The .knowledge root is created under the target repo.",
+        "The sources, knowledge, and rules layers exist.",
+        "The structure home note and all five note templates exist.",
+        "The scaffold summary reports apply mode with non-zero created directories.",
+        "The validator accepts the generated workspace."
+      ]
+    },
+    {
+      "id": "preserve_existing",
+      "prompt": "Use $knowledge to refresh the .knowledge scaffold in a repo that already has user notes and a customized managed file, but do not overwrite existing work.",
+      "expected_output": "Existing user content and customized starter files are preserved when the scaffold is re-run without force.",
+      "assertions": [
+        "A pre-existing user-authored permanent note remains unchanged.",
+        "A customized managed file remains unchanged without --force-managed.",
+        "The script summary reports apply mode with skipped files."
+      ]
+    },
+    {
+      "id": "force_managed_refresh",
+      "prompt": "Use $knowledge to repair the managed starter files in an existing .knowledge folder while leaving user-authored notes intact.",
+      "expected_output": "Managed files are restored with --force-managed and user-authored files are preserved.",
+      "assertions": [
+        "A customized managed file is rewritten to the default content when --force-managed is used.",
+        "A user-authored permanent note remains unchanged after the forced refresh.",
+        "The script summary reports apply mode with written files."
+      ]
+    },
+    {
+      "id": "validator_detects_damage",
+      "prompt": "Use $knowledge to verify that a damaged .knowledge workspace is invalid and identify the missing managed file.",
+      "expected_output": "The validator fails when a required managed file is missing and reports the missing file path.",
+      "assertions": [
+        "The validator exits non-zero for a damaged workspace.",
+        "The validator reports the missing managed file.",
+        "The validator summary marks the workspace invalid."
+      ]
+    },
+    {
+      "id": "quality_good_examples",
+      "prompt": "Use $knowledge to evaluate whether a set of example notes follows atomicity, provenance, and link-context expectations.",
+      "expected_output": "The note-quality checker accepts the example notes and reports a strong mean score.",
+      "assertions": [
+        "The note-quality checker exits successfully for the good examples.",
+        "The note-quality summary marks the note set valid.",
+        "The note-quality summary reports five checked notes.",
+        "The mean quality score is at least 90."
+      ]
+    },
+    {
+      "id": "quality_detects_bad_note",
+      "prompt": "Use $knowledge to detect a bad permanent note that violates atomicity, provenance, and link-context expectations.",
+      "expected_output": "The note-quality checker fails and reports the quality problems in the damaged note.",
+      "assertions": [
+        "The note-quality checker exits non-zero for the bad note.",
+        "The note-quality summary marks the note set invalid.",
+        "The bad note reports an atomicity error.",
+        "The bad note reports a link-context or provenance error."
+      ]
+    }
+  ]
+}

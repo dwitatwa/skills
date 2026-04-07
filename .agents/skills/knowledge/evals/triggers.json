@@ -1,0 +1,27 @@
+{
+  "skill_name": "knowledge",
+  "should_trigger": [
+    "Use $knowledge to create a .knowledge folder for this repo.",
+    "Set up a second-brain workspace in files with sources, knowledge, and rules layers.",
+    "Bootstrap a knowledge vault in this project so notes and sources stay separate.",
+    "Create durable project memory under a .knowledge directory.",
+    "I have a design doc for a second brain. Turn it into a repo-local knowledge system.",
+    "Scaffold a Zettelkasten-style note workspace in this repository.",
+    "Repair the .knowledge folder in this repo without deleting my notes.",
+    "Standardize our .knowledge structure and seed note templates.",
+    "Initialize a personal knowledge system in files for this codebase.",
+    "Refresh the starter files in .knowledge while keeping user notes."
+  ],
+  "should_not_trigger": [
+    "Write a README for this project.",
+    "Build a documentation website for our product knowledge base.",
+    "Add a search feature to the app.",
+    "Summarize these meeting notes into one markdown file.",
+    "Create database migration files for the new tables.",
+    "Refactor the React components in this page.",
+    "Generate a public wiki page for customer support.",
+    "Help me organize browser bookmarks.",
+    "Write onboarding docs for the engineering team.",
+    "Create a CMS content model for articles and categories."
+  ]
+}
