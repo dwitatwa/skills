@@ -1,4 +1,4 @@
 interface:
   display_name: "Knowledge"
-  short_description: "Maintain and query a three-layer .knowledge workspace"
-  default_prompt: "Use $knowledge to search, create, or refresh a repo-local .knowledge folder with sources, knowledge, and rules layers plus Zettelkasten note templates."
+  short_description: "Maintain, query, and log a .knowledge workspace"
+  default_prompt: "Use $knowledge to search, create, update, or refresh a repo-local .knowledge folder with sources, knowledge, rules, and knowledge-update logs."

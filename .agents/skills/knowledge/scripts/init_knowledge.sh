@@ -149,6 +149,7 @@ write_managed_file() {
 
 dirs=(
   "$knowledge_dir"
+  "$knowledge_dir/logs"
   "$knowledge_dir/sources"
   "$knowledge_dir/sources/inbox"
   "$knowledge_dir/sources/archive"
@@ -170,17 +171,32 @@ done
 write_managed_file "$knowledge_dir/README.md" <<'EOF'
 # .knowledge
 
-This workspace separates capture, linked knowledge, and maintenance rules.
+This workspace separates capture, linked knowledge, maintenance rules, and update history.
 
 ## Layers
 
 - `sources/` preserves raw inputs and evidence.
 - `knowledge/` holds linked notes and evolving insight.
 - `rules/` holds the templates and conventions that keep the system coherent.
+- `logs/` records meaningful knowledge updates over time.
 
 ## Entry point
 
 Start in `knowledge/structure/0000-home.md` and expand from there with links, not with a rigid topic tree.
+EOF
+
+write_managed_file "$knowledge_dir/logs/README.md" <<'EOF'
+# Logs
+
+This folder records meaningful updates to the `.knowledge` workspace.
+
+## Use logs for
+
+- merges that change existing knowledge
+- note revisions triggered by code or docs updates
+- resolved questions or important new gaps
+
+Each log entry should say what changed, why it changed, which notes were touched, and what repo source triggered the update.
 EOF
 
 write_managed_file "$knowledge_dir/rules/README.md" <<'EOF'
@@ -225,6 +241,17 @@ write_managed_file "$knowledge_dir/rules/maintenance.md" <<'EOF'
 - Promote stable ideas from literature notes into permanent notes.
 - Update structure notes when a cluster grows or changes shape.
 - Preserve uncertainty in `open-questions/` instead of forcing premature conclusions.
+- Write a log entry in `logs/` after meaningful repo-driven knowledge updates.
+EOF
+
+write_managed_file "$knowledge_dir/rules/change-log.md" <<'EOF'
+# Change Log Rules
+
+- Create one log entry per coherent knowledge update event.
+- Use log entries for merge-driven note revisions, resolved questions, and important new gaps.
+- Keep changed note paths relative to `.knowledge`.
+- Record the repo source that triggered the update whenever possible.
+- Prefer short readable summaries over noisy change dumps.
 EOF
 
 write_managed_file "$knowledge_dir/rules/templates/literature-note.md" <<'EOF'

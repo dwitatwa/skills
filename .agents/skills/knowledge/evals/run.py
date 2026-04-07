@@ -499,7 +499,7 @@ def grade_search_can_include_rules(skill_root: Path, case_dir: Path):
         },
         {
             "assertion": "The results contain the provenance rule file.",
-            "pass": any(path.endswith(".knowledge/rules/provenance.md") for path in result_paths),
+            "pass": "rules/provenance.md" in result_paths,
             "evidence": result_paths,
         },
     ]
@@ -538,6 +538,145 @@ def grade_search_handles_no_match(skill_root: Path, case_dir: Path):
             "assertion": "The search helper returns zero matches.",
             "pass": summary["total_matches"] == 0,
             "evidence": summary["total_matches"],
+        },
+    ]
+    return result_payload(assertions)
+
+
+def grade_log_entry_creation(skill_root: Path, case_dir: Path):
+    repo_dir = case_dir / "with_skill" / "outputs" / "repo"
+    repo_dir.mkdir(parents=True, exist_ok=True)
+
+    run_cmd(
+        [
+            "bash",
+            str(skill_root / "scripts" / "init_knowledge.sh"),
+            "--path",
+            str(repo_dir),
+        ],
+        cwd=skill_root,
+    )
+
+    result = run_cmd(
+        [
+            "python3",
+            str(skill_root / "scripts" / "write_knowledge_log.py"),
+            "--path",
+            str(repo_dir),
+            "--title",
+            "Authentication merge update",
+            "--summary",
+            "Updated authentication knowledge after the new session refresh merge.",
+            "--changed-note",
+            "knowledge/permanent/authentication-session-refresh.md",
+            "--changed-note",
+            "knowledge/structure/authentication.md",
+            "--repo-source",
+            "src/auth/middleware.ts",
+            "--repo-source",
+            "docs/auth/session-refresh.md",
+            "--follow-up",
+            "Confirm whether the mobile client uses the same refresh policy.",
+            "--json",
+        ],
+        cwd=skill_root,
+    )
+    (case_dir / "with_skill" / "stdout.json").write_text(result["stdout"])
+    (case_dir / "with_skill" / "stderr.log").write_text(result["stderr"])
+    write_json(case_dir / "with_skill" / "timing.json", {"duration_ms": result["duration_ms"]})
+
+    summary = json.loads(result["stdout"])
+    log_path = repo_dir / ".knowledge" / summary["path"]
+    text = log_path.read_text()
+    assertions = [
+        {
+            "assertion": "The log writer exits successfully.",
+            "pass": result["returncode"] == 0,
+            "evidence": result["returncode"],
+        },
+        {
+            "assertion": "The log writer returns a logs/ relative path.",
+            "pass": summary["path"].startswith("logs/"),
+            "evidence": summary["path"],
+        },
+        assert_exists(log_path, "The log file exists."),
+        {
+            "assertion": "The log file records the changed note path.",
+            "pass": "knowledge/permanent/authentication-session-refresh.md" in text,
+            "evidence": "knowledge/permanent/authentication-session-refresh.md",
+        },
+        {
+            "assertion": "The log file records the repo source.",
+            "pass": "src/auth/middleware.ts" in text,
+            "evidence": "src/auth/middleware.ts",
+        },
+    ]
+    return result_payload(assertions)
+
+
+def grade_search_can_include_logs(skill_root: Path, case_dir: Path):
+    repo_dir = case_dir / "with_skill" / "outputs" / "repo"
+    repo_dir.mkdir(parents=True, exist_ok=True)
+
+    run_cmd(
+        [
+            "bash",
+            str(skill_root / "scripts" / "init_knowledge.sh"),
+            "--path",
+            str(repo_dir),
+        ],
+        cwd=skill_root,
+    )
+
+    log_result = run_cmd(
+        [
+            "python3",
+            str(skill_root / "scripts" / "write_knowledge_log.py"),
+            "--path",
+            str(repo_dir),
+            "--title",
+            "Authentication merge update",
+            "--summary",
+            "Updated authentication knowledge after the new session refresh merge.",
+            "--changed-note",
+            "knowledge/permanent/authentication-session-refresh.md",
+            "--repo-source",
+            "src/auth/middleware.ts",
+            "--json",
+        ],
+        cwd=skill_root,
+    )
+    log_summary = json.loads(log_result["stdout"])
+
+    result = run_cmd(
+        [
+            "python3",
+            str(skill_root / "scripts" / "search_knowledge.py"),
+            "--path",
+            str(repo_dir),
+            "--query",
+            "authentication merge update",
+            "--include-logs",
+            "--json",
+        ],
+        cwd=skill_root,
+    )
+    (case_dir / "with_skill" / "stdout.json").write_text(result["stdout"])
+    (case_dir / "with_skill" / "stderr.log").write_text(result["stderr"])
+    write_json(case_dir / "with_skill" / "timing.json", {"duration_ms": result["duration_ms"]})
+
+    summary = json.loads(result["stdout"])
+    result_paths = [item["path"] for item in summary["results"]]
+    assertions = [
+        {
+            "assertion": "The search helper exits successfully when include-logs is enabled.",
+            "pass": result["returncode"] == 0,
+            "evidence": result["returncode"],
+        },
+        {
+            "assertion": "The results contain the new log entry.",
+            "pass": log_summary["path"] in result_paths,
+            "evidence": result_paths,
         },
     ]
     return result_payload(assertions)
@@ -710,6 +849,8 @@ def main():
         "search_finds_relevant_notes": grade_search_finds_relevant_notes,
         "search_can_include_rules": grade_search_can_include_rules,
         "search_handles_no_match": grade_search_handles_no_match,
+        "log_entry_creation": grade_log_entry_creation,
+        "search_can_include_logs": grade_search_can_include_logs,
         "retrieval_style_guidance": grade_retrieval_style_guidance,
         "llm_judge_good_examples": grade_llm_judge_good_examples,
         "llm_judge_bad_note": grade_llm_judge_bad_note,

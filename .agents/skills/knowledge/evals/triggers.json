@@ -13,7 +13,9 @@
     "Refresh the starter files in .knowledge while keeping user notes.",
     "What do we already know in .knowledge about atomic notes?",
     "Search this repo's knowledge notes for provenance guidance.",
-    "Find the existing notes about note making in the .knowledge workspace."
+    "Find the existing notes about note making in the .knowledge workspace.",
+    "Update the knowledge after the latest merge and keep a log entry.",
+    "Show me the previous knowledge updates for authentication."
   ],
   "should_not_trigger": [
     "Write a README for this project.",

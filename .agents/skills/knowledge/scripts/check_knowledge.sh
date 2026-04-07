@@ -59,6 +59,7 @@ knowledge_dir="$target_root/.knowledge"
 
 required_dirs=(
   "$knowledge_dir"
+  "$knowledge_dir/logs"
   "$knowledge_dir/sources"
   "$knowledge_dir/sources/inbox"
   "$knowledge_dir/sources/archive"
@@ -75,7 +76,9 @@ required_dirs=(
 
 required_files=(
   "$knowledge_dir/README.md"
+  "$knowledge_dir/logs/README.md"
   "$knowledge_dir/rules/README.md"
+  "$knowledge_dir/rules/change-log.md"
   "$knowledge_dir/rules/linking.md"
   "$knowledge_dir/rules/provenance.md"
   "$knowledge_dir/rules/maintenance.md"

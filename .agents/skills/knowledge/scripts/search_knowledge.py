@@ -32,6 +32,11 @@ def parse_args():
         help="Also search .knowledge/rules for process and governance questions",
     )
     parser.add_argument(
+        "--include-logs",
+        action="store_true",
+        help="Also search .knowledge/logs for update history questions",
+    )
+    parser.add_argument(
         "--json",
         action="store_true",
         help="Write the search results as JSON to stdout",
@@ -66,10 +71,10 @@ def tokenize(query: str):
     return [token for token in re.findall(r"[a-z0-9]+", query.lower()) if len(token) > 1]
 
 
-def score_file(path: Path, root: Path, query: str, tokens):
+def score_file(path: Path, knowledge_dir: Path, query: str, tokens):
     text = path.read_text()
     lower = text.lower()
-    rel = str(path.relative_to(root))
+    rel = str(path.relative_to(knowledge_dir))
     rel_lower = rel.lower()
     title, body = extract_frontmatter_title(text)
     h1 = extract_h1(body)
@@ -132,12 +137,15 @@ def main():
     knowledge_dir = root / ".knowledge"
     knowledge_root = knowledge_dir / "knowledge"
     rules_root = knowledge_dir / "rules"
+    logs_root = knowledge_dir / "logs"
 
     search_roots = []
     if knowledge_root.is_dir():
         search_roots.append(knowledge_root)
     if args.include_rules and rules_root.is_dir():
         search_roots.append(rules_root)
+    if args.include_logs and logs_root.is_dir():
+        search_roots.append(logs_root)
 
     if not search_roots:
         print(f"error: no searchable .knowledge directories found under {knowledge_dir}", file=sys.stderr)
@@ -147,7 +155,7 @@ def main():
     results = []
     for search_root in search_roots:
         for path in sorted(search_root.rglob("*.md")):
-            item = score_file(path, root, args.query, tokens)
+            item = score_file(path, knowledge_dir, args.query, tokens)
             if item:
                 results.append(item)
 
@@ -158,6 +166,7 @@ def main():
         "knowledge_dir": str(knowledge_dir),
         "query": args.query,
         "include_rules": args.include_rules,
+        "include_logs": args.include_logs,
         "total_matches": len(results),
         "results": results,
     }
@@ -168,6 +177,7 @@ def main():
         print(f"knowledge_dir={summary['knowledge_dir']}")
         print(f"query={summary['query']}")
         print(f"include_rules={'true' if args.include_rules else 'false'}")
+        print(f"include_logs={'true' if args.include_logs else 'false'}")
         print(f"total_matches={summary['total_matches']}")
         for item in results:
             print(f"path={item['path']}")

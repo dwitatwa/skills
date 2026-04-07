@@ -95,6 +95,27 @@
       ]
     },
     {
+      "id": "log_entry_creation",
+      "prompt": "Use $knowledge to record a knowledge update after a repo change and create a log entry.",
+      "expected_output": "The log writer creates a timestamped entry under logs/ and records the changed notes and repo sources.",
+      "assertions": [
+        "The log writer exits successfully.",
+        "The log writer returns a logs/ relative path.",
+        "The log file exists.",
+        "The log file records the changed note path.",
+        "The log file records the repo source."
+      ]
+    },
+    {
+      "id": "search_can_include_logs",
+      "prompt": "Use $knowledge to find a previous knowledge update in the logs.",
+      "expected_output": "The search helper can include log entries for history questions and returns the matching log file.",
+      "assertions": [
+        "The search helper exits successfully when include-logs is enabled.",
+        "The results contain the new log entry."
+      ]
+    },
+    {
       "id": "retrieval_style_guidance",
       "prompt": "Use $knowledge to answer from stored knowledge in natural prose and cite note files relative to the .knowledge root.",
       "expected_output": "The skill instructions and retrieval example both enforce natural prose, avoid stiff note-system phrasing, and use .knowledge-root-relative source paths.",
