@@ -29,10 +29,11 @@ Read `references/example-update-log-workflow.md` when the user wants to update `
 8. Prefer timestamp note IDs for digital notes. Keep one main idea per knowledge note, write in the user's own words, and keep provenance visible.
 9. Seed structure notes as entry points, not as rigid taxonomy pages. Use links and link context to connect notes across topics.
 10. Run `bash scripts/check_knowledge.sh --path "$TARGET_ROOT"` after scaffolding or repair work. Use `--json` when the result will be checked by scripts or evals.
-11. If the repo already contains knowledge notes or you add sample notes, run `python3 scripts/check_note_quality.py --path "$TARGET_ROOT"` to check atomicity, provenance, and link-context heuristics. Use `--json` for scripted grading.
-12. If `OPENAI_API_KEY` is available and semantic note quality matters, run `python3 scripts/judge_note_semantics_openai.py --path "$TARGET_ROOT" --json` to get an LLM-judged pass/fail signal for note coherence, provenance clarity, and reusable-knowledge quality.
-13. If you update notes after a merge, refactor, or other repo change, append a log entry with `python3 scripts/write_knowledge_log.py --path "$TARGET_ROOT" --title "$TITLE" --summary "$SUMMARY" --changed-note "knowledge/..." --repo-source "path/in/repo" --json`. Use repeated `--changed-note`, `--repo-source`, and `--follow-up` flags as needed.
-14. Mention any places where the user's design doc forced a deviation from the default model.
+11. If you need to create or update a knowledge note quickly, run `python3 scripts/upsert_knowledge_note.py --path "$TARGET_ROOT" ...` to generate the note path, frontmatter, and default sections without hand-editing the full markdown file.
+12. If the repo already contains knowledge notes or you add sample notes, run `python3 scripts/check_note_quality.py --path "$TARGET_ROOT"` to check atomicity, provenance, and link-context heuristics. Use `--json` for scripted grading.
+13. If `OPENAI_API_KEY` is available and semantic note quality matters, run `python3 scripts/judge_note_semantics_openai.py --path "$TARGET_ROOT" --json` to get an LLM-judged pass/fail signal for note coherence, provenance clarity, and reusable-knowledge quality.
+14. If you update notes after a merge, refactor, or other repo change, append a log entry with `python3 scripts/write_knowledge_log.py --path "$TARGET_ROOT" --title "$TITLE" --summary "$SUMMARY" --changed-note "knowledge/..." --repo-source "path/in/repo" --json`. Use repeated `--changed-note`, `--repo-source`, and `--follow-up` flags as needed.
+15. Mention any places where the user's design doc forced a deviation from the default model.
 
 ## Retrieval Style
 
@@ -48,6 +49,7 @@ Read `references/example-update-log-workflow.md` when the user wants to update `
 
 - `scripts/init_knowledge.sh` - scaffold or refresh the managed `.knowledge` folder structure and starter files.
 - `scripts/search_knowledge.py` - search existing `.knowledge` notes and optionally rules for a topic before creating new knowledge.
+- `scripts/upsert_knowledge_note.py` - create or update a note file with the right path, frontmatter, and section scaffold.
 - `scripts/write_knowledge_log.py` - append a timestamped knowledge-update log entry after merges or note revisions.
 - `scripts/check_knowledge.sh` - validate that a repo-local `.knowledge` workspace still has the managed core structure.
 - `scripts/check_note_quality.py` - grade note-quality heuristics for atomicity, provenance, and link context.
