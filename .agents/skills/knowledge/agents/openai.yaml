@@ -1,0 +1,4 @@
+interface:
+  display_name: "Knowledge"
+  short_description: "Scaffold a three-layer .knowledge workspace"
+  default_prompt: "Use $knowledge to create or refresh a repo-local .knowledge folder with sources, knowledge, and rules layers plus Zettelkasten note templates."
