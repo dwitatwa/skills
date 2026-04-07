@@ -17,7 +17,7 @@ def parse_args():
         "--workspace",
         type=Path,
         default=None,
-        help="Directory for iteration outputs (default: evals/workspace)",
+        help="Directory for iteration outputs (default: /tmp/knowledge-evals)",
     )
     return parser.parse_args()
 
@@ -410,6 +410,182 @@ def grade_quality_detects_bad_note(skill_root: Path, case_dir: Path):
     return result_payload(assertions)
 
 
+def grade_search_finds_relevant_notes(skill_root: Path, case_dir: Path):
+    repo_dir = case_dir / "with_skill" / "outputs" / "repo"
+    fixture_dir = skill_root / "evals" / "files" / "quality-good"
+    copy_fixture(fixture_dir, repo_dir)
+
+    result = run_cmd(
+        [
+            "python3",
+            str(skill_root / "scripts" / "search_knowledge.py"),
+            "--path",
+            str(repo_dir),
+            "--query",
+            "atomic notes",
+            "--json",
+        ],
+        cwd=skill_root,
+    )
+    (case_dir / "with_skill" / "stdout.json").write_text(result["stdout"])
+    (case_dir / "with_skill" / "stderr.log").write_text(result["stderr"])
+    write_json(case_dir / "with_skill" / "timing.json", {"duration_ms": result["duration_ms"]})
+
+    summary = json.loads(result["stdout"])
+    top = summary["results"][0] if summary["results"] else {}
+    assertions = [
+        {
+            "assertion": "The search helper exits successfully for a relevant query.",
+            "pass": result["returncode"] == 0,
+            "evidence": result["returncode"],
+        },
+        {
+            "assertion": "The search helper returns at least two matches.",
+            "pass": summary["total_matches"] >= 2,
+            "evidence": summary["total_matches"],
+        },
+        {
+            "assertion": "The top result path contains the atomic-notes topic.",
+            "pass": "atomic-notes" in top.get("path", ""),
+            "evidence": top.get("path"),
+        },
+        {
+            "assertion": "The top result includes at least one snippet.",
+            "pass": len(top.get("snippets", [])) > 0,
+            "evidence": top.get("snippets", []),
+        },
+    ]
+    return result_payload(assertions)
+
+
+def grade_search_can_include_rules(skill_root: Path, case_dir: Path):
+    repo_dir = case_dir / "with_skill" / "outputs" / "repo"
+    repo_dir.mkdir(parents=True, exist_ok=True)
+
+    run_cmd(
+        [
+            "bash",
+            str(skill_root / "scripts" / "init_knowledge.sh"),
+            "--path",
+            str(repo_dir),
+        ],
+        cwd=skill_root,
+    )
+
+    result = run_cmd(
+        [
+            "python3",
+            str(skill_root / "scripts" / "search_knowledge.py"),
+            "--path",
+            str(repo_dir),
+            "--query",
+            "provenance",
+            "--include-rules",
+            "--json",
+        ],
+        cwd=skill_root,
+    )
+    (case_dir / "with_skill" / "stdout.json").write_text(result["stdout"])
+    (case_dir / "with_skill" / "stderr.log").write_text(result["stderr"])
+    write_json(case_dir / "with_skill" / "timing.json", {"duration_ms": result["duration_ms"]})
+
+    summary = json.loads(result["stdout"])
+    result_paths = [item["path"] for item in summary["results"]]
+    assertions = [
+        {
+            "assertion": "The search helper exits successfully when include-rules is enabled.",
+            "pass": result["returncode"] == 0,
+            "evidence": result["returncode"],
+        },
+        {
+            "assertion": "The results contain the provenance rule file.",
+            "pass": any(path.endswith(".knowledge/rules/provenance.md") for path in result_paths),
+            "evidence": result_paths,
+        },
+    ]
+    return result_payload(assertions)
+
+
+def grade_search_handles_no_match(skill_root: Path, case_dir: Path):
+    repo_dir = case_dir / "with_skill" / "outputs" / "repo"
+    fixture_dir = skill_root / "evals" / "files" / "quality-good"
+    copy_fixture(fixture_dir, repo_dir)
+
+    result = run_cmd(
+        [
+            "python3",
+            str(skill_root / "scripts" / "search_knowledge.py"),
+            "--path",
+            str(repo_dir),
+            "--query",
+            "quantum entanglement",
+            "--json",
+        ],
+        cwd=skill_root,
+    )
+    (case_dir / "with_skill" / "stdout.json").write_text(result["stdout"])
+    (case_dir / "with_skill" / "stderr.log").write_text(result["stderr"])
+    write_json(case_dir / "with_skill" / "timing.json", {"duration_ms": result["duration_ms"]})
+
+    summary = json.loads(result["stdout"])
+    assertions = [
+        {
+            "assertion": "The search helper exits successfully for an unknown query.",
+            "pass": result["returncode"] == 0,
+            "evidence": result["returncode"],
+        },
+        {
+            "assertion": "The search helper returns zero matches.",
+            "pass": summary["total_matches"] == 0,
+            "evidence": summary["total_matches"],
+        },
+    ]
+    return result_payload(assertions)
+
+
+def grade_retrieval_style_guidance(skill_root: Path, case_dir: Path):
+    skill_text = (skill_root / "SKILL.md").read_text()
+    retrieval_ref = (skill_root / "references" / "example-retrieval-workflow.md").read_text()
+
+    assertions = [
+        {
+            "assertion": "The skill instructions require direct natural prose for retrieval answers.",
+            "pass": "answer the topic directly in natural, user-facing prose" in skill_text,
+            "evidence": "answer the topic directly in natural, user-facing prose",
+        },
+        {
+            "assertion": "The skill instructions explicitly avoid meta phrases about the notes or knowledge base.",
+            "pass": 'Do not frame the response with phrases like "the knowledge base says" or "the current notes suggest"' in skill_text,
+            "evidence": 'Do not frame the response with phrases like "the knowledge base says" or "the current notes suggest"',
+        },
+        {
+            "assertion": "The retrieval example uses a Sources used section.",
+            "pass": "Sources used:" in retrieval_ref,
+            "evidence": "Sources used:",
+        },
+        {
+            "assertion": "The retrieval example cites knowledge/ or rules/ paths instead of .knowledge/ paths.",
+            "pass": ("- knowledge/" in retrieval_ref or "- rules/" in retrieval_ref) and ".knowledge/" not in retrieval_ref,
+            "evidence": [line for line in retrieval_ref.splitlines() if line.startswith("- ")][:5],
+        },
+    ]
+
+    write_json(
+        case_dir / "with_skill" / "grading.json",
+        {
+            "id": "retrieval_style_guidance",
+            "prompt": "Use $knowledge to answer from stored knowledge in natural prose and cite note files relative to the .knowledge root.",
+            "expected_output": "The skill instructions and retrieval example both enforce natural prose, avoid stiff note-system phrasing, and use .knowledge-root-relative source paths.",
+            "assertions": assertions,
+            "skipped": False,
+            "skip_reason": None,
+            "passed": all(item["pass"] for item in assertions),
+        },
+    )
+
+    return result_payload(assertions)
+
+
 def grade_llm_judge_good_examples(skill_root: Path, case_dir: Path):
     if not os.environ.get("OPENAI_API_KEY"):
         return result_payload(skipped=True, skip_reason="OPENAI_API_KEY is not set.")
@@ -506,7 +682,7 @@ def main():
     args = parse_args()
     eval_root = Path(__file__).resolve().parent
     skill_root = eval_root.parent
-    workspace_root = args.workspace or (eval_root / "workspace")
+    workspace_root = args.workspace or Path("/tmp/knowledge-evals")
     iteration_dir = next_iteration_dir(workspace_root)
     iteration_dir.mkdir(parents=True, exist_ok=False)
 
@@ -531,6 +707,10 @@ def main():
         "validator_detects_damage": grade_validator_detects_damage,
         "quality_good_examples": grade_quality_good_examples,
         "quality_detects_bad_note": grade_quality_detects_bad_note,
+        "search_finds_relevant_notes": grade_search_finds_relevant_notes,
+        "search_can_include_rules": grade_search_can_include_rules,
+        "search_handles_no_match": grade_search_handles_no_match,
+        "retrieval_style_guidance": grade_retrieval_style_guidance,
         "llm_judge_good_examples": grade_llm_judge_good_examples,
         "llm_judge_bad_note": grade_llm_judge_bad_note,
     }

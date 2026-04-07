@@ -10,7 +10,10 @@
     "Repair the .knowledge folder in this repo without deleting my notes.",
     "Standardize our .knowledge structure and seed note templates.",
     "Initialize a personal knowledge system in files for this codebase.",
-    "Refresh the starter files in .knowledge while keeping user notes."
+    "Refresh the starter files in .knowledge while keeping user notes.",
+    "What do we already know in .knowledge about atomic notes?",
+    "Search this repo's knowledge notes for provenance guidance.",
+    "Find the existing notes about note making in the .knowledge workspace."
   ],
   "should_not_trigger": [
     "Write a README for this project.",

@@ -66,6 +66,46 @@
       ]
     },
     {
+      "id": "search_finds_relevant_notes",
+      "prompt": "Use $knowledge to find what the repo already knows about atomic notes.",
+      "expected_output": "The search helper returns relevant knowledge notes about atomic notes with ranked results and snippets.",
+      "assertions": [
+        "The search helper exits successfully for a relevant query.",
+        "The search helper returns at least two matches.",
+        "The top result path contains the atomic-notes topic.",
+        "The top result includes at least one snippet."
+      ]
+    },
+    {
+      "id": "search_can_include_rules",
+      "prompt": "Use $knowledge to find the rule that explains provenance behavior in the .knowledge system.",
+      "expected_output": "The search helper can search rules when requested and returns the provenance rule.",
+      "assertions": [
+        "The search helper exits successfully when include-rules is enabled.",
+        "The results contain the provenance rule file."
+      ]
+    },
+    {
+      "id": "search_handles_no_match",
+      "prompt": "Use $knowledge to search for a topic that the repo does not know yet.",
+      "expected_output": "The search helper returns zero matches cleanly for an unknown topic.",
+      "assertions": [
+        "The search helper exits successfully for an unknown query.",
+        "The search helper returns zero matches."
+      ]
+    },
+    {
+      "id": "retrieval_style_guidance",
+      "prompt": "Use $knowledge to answer from stored knowledge in natural prose and cite note files relative to the .knowledge root.",
+      "expected_output": "The skill instructions and retrieval example both enforce natural prose, avoid stiff note-system phrasing, and use .knowledge-root-relative source paths.",
+      "assertions": [
+        "The skill instructions require direct natural prose for retrieval answers.",
+        "The skill instructions explicitly avoid meta phrases about the notes or knowledge base.",
+        "The retrieval example uses a Sources used section.",
+        "The retrieval example cites knowledge/ or rules/ paths instead of .knowledge/ paths."
+      ]
+    },
+    {
       "id": "llm_judge_good_examples",
       "prompt": "Use $knowledge to let an OpenAI judge review example notes for semantic note quality.",
       "expected_output": "When an API key is available, the OpenAI judge accepts the good example set with a strong mean score.",
