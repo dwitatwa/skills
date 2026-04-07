@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -62,6 +63,14 @@ def assert_equal(actual, expected, message: str):
         "assertion": message,
         "pass": actual == expected,
         "evidence": {"actual": actual, "expected": expected},
+    }
+
+
+def result_payload(assertions=None, skipped=False, skip_reason=None):
+    return {
+        "assertions": assertions or [],
+        "skipped": skipped,
+        "skip_reason": skip_reason,
     }
 
 
@@ -139,7 +148,7 @@ def grade_fresh_scaffold(skill_root: Path, case_dir: Path):
             "evidence": validation_summary,
         },
     ]
-    return assertions
+    return result_payload(assertions)
 
 
 def grade_preserve_existing(skill_root: Path, case_dir: Path):
@@ -194,7 +203,7 @@ def grade_preserve_existing(skill_root: Path, case_dir: Path):
             "evidence": summary["skipped_files"],
         },
     ]
-    return assertions
+    return result_payload(assertions)
 
 
 def grade_force_managed_refresh(skill_root: Path, case_dir: Path):
@@ -249,7 +258,7 @@ def grade_force_managed_refresh(skill_root: Path, case_dir: Path):
             "evidence": summary["written_files"],
         },
     ]
-    return assertions
+    return result_payload(assertions)
 
 
 def grade_validator_detects_damage(skill_root: Path, case_dir: Path):
@@ -302,7 +311,7 @@ def grade_validator_detects_damage(skill_root: Path, case_dir: Path):
             "evidence": summary["valid"],
         },
     ]
-    return assertions
+    return result_payload(assertions)
 
 
 def copy_fixture(src: Path, dst: Path):
@@ -351,7 +360,7 @@ def grade_quality_good_examples(skill_root: Path, case_dir: Path):
             "evidence": summary["mean_score"],
         },
     ]
-    return assertions
+    return result_payload(assertions)
 
 
 def grade_quality_detects_bad_note(skill_root: Path, case_dir: Path):
@@ -398,7 +407,99 @@ def grade_quality_detects_bad_note(skill_root: Path, case_dir: Path):
             "evidence": note["errors"],
         },
     ]
-    return assertions
+    return result_payload(assertions)
+
+
+def grade_llm_judge_good_examples(skill_root: Path, case_dir: Path):
+    if not os.environ.get("OPENAI_API_KEY"):
+        return result_payload(skipped=True, skip_reason="OPENAI_API_KEY is not set.")
+
+    repo_dir = case_dir / "with_skill" / "outputs" / "repo"
+    fixture_dir = skill_root / "evals" / "files" / "quality-good"
+    copy_fixture(fixture_dir, repo_dir)
+
+    result = run_cmd(
+        [
+            "python3",
+            str(skill_root / "scripts" / "judge_note_semantics_openai.py"),
+            "--path",
+            str(repo_dir),
+            "--json",
+        ],
+        cwd=skill_root,
+    )
+    (case_dir / "with_skill" / "stdout.json").write_text(result["stdout"])
+    (case_dir / "with_skill" / "stderr.log").write_text(result["stderr"])
+    write_json(case_dir / "with_skill" / "timing.json", {"duration_ms": result["duration_ms"]})
+
+    summary = json.loads(result["stdout"])
+    assertions = [
+        {
+            "assertion": "The OpenAI judge exits successfully for the good examples.",
+            "pass": result["returncode"] == 0,
+            "evidence": result["returncode"],
+        },
+        {
+            "assertion": "The OpenAI judge marks the note set valid.",
+            "pass": summary["valid"] is True,
+            "evidence": summary["valid"],
+        },
+        {
+            "assertion": "The OpenAI judge reports five checked notes.",
+            "pass": summary["note_count"] == 5,
+            "evidence": summary["note_count"],
+        },
+        {
+            "assertion": "The OpenAI judge mean score is at least 4.0.",
+            "pass": summary["mean_score"] >= 4.0,
+            "evidence": summary["mean_score"],
+        },
+    ]
+    return result_payload(assertions)
+
+
+def grade_llm_judge_bad_note(skill_root: Path, case_dir: Path):
+    if not os.environ.get("OPENAI_API_KEY"):
+        return result_payload(skipped=True, skip_reason="OPENAI_API_KEY is not set.")
+
+    repo_dir = case_dir / "with_skill" / "outputs" / "repo"
+    fixture_dir = skill_root / "evals" / "files" / "quality-bad"
+    copy_fixture(fixture_dir, repo_dir)
+
+    result = run_cmd(
+        [
+            "python3",
+            str(skill_root / "scripts" / "judge_note_semantics_openai.py"),
+            "--path",
+            str(repo_dir),
+            "--json",
+        ],
+        cwd=skill_root,
+    )
+    (case_dir / "with_skill" / "stdout.json").write_text(result["stdout"])
+    (case_dir / "with_skill" / "stderr.log").write_text(result["stderr"])
+    write_json(case_dir / "with_skill" / "timing.json", {"duration_ms": result["duration_ms"]})
+
+    summary = json.loads(result["stdout"])
+    issues = summary["notes"][0]["issues"] if summary["notes"] else []
+    assertions = [
+        {
+            "assertion": "The OpenAI judge exits non-zero for the bad note.",
+            "pass": result["returncode"] != 0,
+            "evidence": result["returncode"],
+        },
+        {
+            "assertion": "The OpenAI judge marks the note set invalid.",
+            "pass": summary["valid"] is False,
+            "evidence": summary["valid"],
+        },
+        {
+            "assertion": "The OpenAI judge reports at least one issue for the bad note.",
+            "pass": len(issues) > 0,
+            "evidence": issues,
+        },
+    ]
+    return result_payload(assertions)
 
 
 def main():
@@ -430,39 +531,58 @@ def main():
         "validator_detects_damage": grade_validator_detects_damage,
         "quality_good_examples": grade_quality_good_examples,
         "quality_detects_bad_note": grade_quality_detects_bad_note,
+        "llm_judge_good_examples": grade_llm_judge_good_examples,
+        "llm_judge_bad_note": grade_llm_judge_bad_note,
     }
 
     passed_cases = 0
+    executed_cases = 0
+    skipped_cases = 0
 
     for case in eval_spec["evals"]:
         case_dir = iteration_dir / case["id"]
         case_dir.mkdir(parents=True, exist_ok=False)
-        assertions = graders[case["id"]](skill_root, case_dir)
-        passed = all(item["pass"] for item in assertions)
-        if passed:
-            passed_cases += 1
+        result = graders[case["id"]](skill_root, case_dir)
+        assertions = result["assertions"]
+        skipped = result["skipped"]
+        passed = all(item["pass"] for item in assertions) if assertions else skipped
+        if skipped:
+            skipped_cases += 1
+        else:
+            executed_cases += 1
+            if passed:
+                passed_cases += 1
 
         grading = {
             "id": case["id"],
             "prompt": case["prompt"],
             "expected_output": case["expected_output"],
             "assertions": assertions,
+            "skipped": skipped,
+            "skip_reason": result["skip_reason"],
             "passed": passed,
         }
         write_json(case_dir / "with_skill" / "grading.json", grading)
         benchmark["cases"].append(
             {
                 "id": case["id"],
+                "status": "skipped" if skipped else ("passed" if passed else "failed"),
                 "passed": passed,
-                "assertion_pass_rate": sum(1 for item in assertions if item["pass"]) / len(assertions),
+                "assertion_pass_rate": (
+                    sum(1 for item in assertions if item["pass"]) / len(assertions)
+                    if assertions
+                    else None
+                ),
             }
         )
 
-    benchmark["pass_rate"] = passed_cases / len(eval_spec["evals"])
+    benchmark["executed_cases"] = executed_cases
+    benchmark["skipped_cases"] = skipped_cases
+    benchmark["pass_rate"] = (passed_cases / executed_cases) if executed_cases else 1.0
     write_json(iteration_dir / "benchmark.json", benchmark)
     print(iteration_dir)
 
-    if passed_cases != len(eval_spec["evals"]):
+    if passed_cases != executed_cases:
         return 1
     return 0
 

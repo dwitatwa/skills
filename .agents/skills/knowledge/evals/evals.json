@@ -64,6 +64,29 @@
         "The bad note reports an atomicity error.",
         "The bad note reports a link-context or provenance error."
       ]
+    },
+    {
+      "id": "llm_judge_good_examples",
+      "prompt": "Use $knowledge to let an OpenAI judge review example notes for semantic note quality.",
+      "expected_output": "When an API key is available, the OpenAI judge accepts the good example set with a strong mean score.",
+      "optional": true,
+      "assertions": [
+        "The OpenAI judge exits successfully for the good examples.",
+        "The OpenAI judge marks the note set valid.",
+        "The OpenAI judge reports five checked notes.",
+        "The OpenAI judge mean score is at least 4.0."
+      ]
+    },
+    {
+      "id": "llm_judge_bad_note",
+      "prompt": "Use $knowledge to let an OpenAI judge detect a semantically weak note.",
+      "expected_output": "When an API key is available, the OpenAI judge rejects the bad note and reports concrete issues.",
+      "optional": true,
+      "assertions": [
+        "The OpenAI judge exits non-zero for the bad note.",
+        "The OpenAI judge marks the note set invalid.",
+        "The OpenAI judge reports at least one issue for the bad note."
+      ]
     }
   ]
 }
