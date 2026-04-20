@@ -144,12 +144,17 @@
         margin: 0;
         padding: 0px 16px;
         overflow-x: auto;
+        white-space: pre;
         font-family: var(--font-mono);
         font-size: 12px;
         line-height: 1.4;
+        tab-size: 2;
       }
 
-      code { font-family: inherit; }
+      code {
+        font-family: inherit;
+        white-space: inherit;
+      }
 
       .diff-line {
         display: block;
