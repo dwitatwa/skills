@@ -1,4 +1,4 @@
 interface:
   display_name: "Explainer"
-  short_description: "Write a Markdown explanation of existing file changes"
-  default_prompt: "Use $explainer to inspect staged changes, unstaged changes, or another existing change set, compare it to the clearest baseline, write a Markdown explanation file, and then briefly tell the user where the file was saved without drifting into implementation or code review."
+  short_description: "Write a Markdown explanation of file changes into explain/"
+  default_prompt: "Use $explainer to inspect staged changes, unstaged changes, or another existing change set, compare it to the clearest baseline, write a Markdown explanation file into the default `explain/` folder unless the user provides a path, and then briefly tell the user where the file was saved without drifting into implementation or code review."

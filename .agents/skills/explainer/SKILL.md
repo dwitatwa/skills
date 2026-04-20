@@ -28,7 +28,8 @@ Explain existing file changes from the clearest available baseline and write the
    - do not narrate every changed line when a higher-level explanation is clearer
 8. Choose the output path before writing:
    - use the user-provided Markdown path when one is given
-   - otherwise, write in the working tree root with a descriptive default name such as `staged-change-explanation.md`, `unstaged-change-explanation.md`, or `change-explanation.md`
+   - otherwise, write into a default `explain/` folder in the working tree root with a descriptive name such as `explain/staged-change-explanation.md`, `explain/unstaged-change-explanation.md`, or `explain/change-explanation.md`
+   - create the `explain/` folder if it does not exist
    - if that default file already exists and the user did not ask to overwrite it, create a nearby unique name instead of replacing the existing file silently
 9. Write the explanation as Markdown. Include a short title, a summary, the scope or baseline used, grouped file explanations, and verification context when available.
 10. Cite concrete file references when they help the explanation. Use the changed file paths and current line numbers where possible.
