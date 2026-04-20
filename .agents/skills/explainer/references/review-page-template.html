@@ -3,422 +3,328 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Change Explanation</title>
+    <title>Commit 307fe11 | Change Analysis</title>
     <style>
       :root {
-        color-scheme: light;
-        --bg: #f8f9fa;
-        --panel: #ffffff;
-        --panel-muted: #f1f3f5;
-        --border: #d9dee3;
+        /* Pearl Minimal Palette - Refined for Institutional use */
+        --bg: #fcfcfc;
+        --surface: #ffffff;
+        --surface-muted: #f6f8fa;
+        --border: #d0d7de;
+        --border-muted: #d8dee4;
         --text: #1f2328;
-        --text-soft: #57606a;
-        --accent: #2f6f49;
-        --accent-soft: #edf6f0;
-        --added-bg: #eefaf1;
-        --added-border: #8ec7a0;
-        --removed-bg: #fdf0ef;
-        --removed-border: #d7a29b;
-        --neutral-code: #f6f8fa;
-        --radius-lg: 10px;
-        --radius-md: 8px;
-        --radius-sm: 6px;
-        --space-1: 4px;
-        --space-2: 8px;
-        --space-3: 12px;
-        --space-4: 16px;
-        --space-5: 24px;
-        --space-6: 32px;
-        --space-7: 48px;
-        --max: 1380px;
+        --text-muted: #636c76;
+        --accent: #0969da;
+        --accent-muted: #ddf4ff;
+        --added: #248046;
+        --added-bg: #dafbe1;
+        --removed: #cf222e;
+        --removed-bg: #ffebe9;
+
+        --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+        --radius: 6px;
+        --space-gap: 24px;
+        --max-width: 840px;
       }
 
-      * {
-        box-sizing: border-box;
-      }
-
-      html {
-        scroll-behavior: smooth;
-      }
+      * { box-sizing: border-box; }
 
       body {
         margin: 0;
-        background: var(--bg);
+        padding: 40px 20px;
+        background-color: var(--bg);
         color: var(--text);
-        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        line-height: 1.55;
+        font-family: var(--font-sans);
+        font-size: 14px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
       }
 
-      a {
-        color: inherit;
-      }
-
-      .page {
-        width: min(calc(100% - 40px), var(--max));
+      .container {
+        max-width: var(--max-width);
         margin: 0 auto;
-        padding: var(--space-6) 0 var(--space-7);
       }
 
-      .hero {
-        display: grid;
-        gap: var(--space-4);
-        padding: var(--space-5);
+      /* Header & Meta */
+      header {
+        margin-bottom: 48px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 24px;
+      }
+
+      .commit-badge {
+        display: inline-flex;
+        align-items: center;
+        background: var(--surface-muted);
         border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        background: var(--panel);
-      }
-
-      h1,
-      h2,
-      h3 {
-        margin: 0;
-        line-height: 1.1;
-        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: var(--radius);
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 12px;
+        color: var(--accent);
+        margin-bottom: 12px;
       }
 
       h1 {
-        max-width: 24ch;
-        font-size: 2rem;
-        letter-spacing: -0.03em;
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 0 0 16px 0;
+        line-height: 1.25;
+      }
+
+      .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 16px;
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
+      .meta-item strong {
+        display: block;
+        color: var(--text);
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+
+      /* Sections */
+      section {
+        margin-bottom: 56px;
       }
 
       h2 {
-        font-size: 1.2rem;
-        letter-spacing: -0.02em;
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 20px 0;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-muted);
       }
 
       h3 {
-        font-size: 1rem;
-      }
-
-      .hero p,
-      .section p,
-      .article-body p {
-        max-width: 72ch;
-        margin: 0;
-      }
-
-      .meta-list,
-      .scope-list {
-        margin: 0;
-        padding-left: 1.1rem;
-        display: grid;
-        gap: var(--space-2);
-        color: var(--text-soft);
-      }
-
-      .layout {
-        display: grid;
-        grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
-        gap: var(--space-6);
-        margin-top: var(--space-6);
-      }
-
-      .toc {
-        position: sticky;
-        top: var(--space-5);
-        align-self: start;
-        padding: var(--space-4);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        background: var(--panel);
-      }
-
-      .toc-title {
-        margin: 0 0 var(--space-4);
-        font-size: 0.9rem;
+        font-size: 15px;
         font-weight: 600;
-        color: var(--text-soft);
+        margin: 32px 0 12px 0;
       }
 
-      .toc ol {
-        margin: 0;
-        padding-left: 1.15rem;
-        display: grid;
-        gap: var(--space-3);
-      }
+      p { margin: 0 0 16px 0; }
 
-      .toc a {
-        text-decoration: none;
-      }
-
-      .content {
-        display: grid;
-        gap: var(--space-5);
-      }
-
-      .section,
-      .file-card {
-        padding: var(--space-5);
+      .summary-box {
+        background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        background: var(--panel);
+        padding: 20px;
+        border-radius: var(--radius);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
       }
 
-      .section-head {
-        display: grid;
-        gap: var(--space-3);
-        margin-bottom: var(--space-5);
+      /* Code Blocks */
+      .code-container {
+        margin: 16px 0;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: var(--surface-muted);
       }
 
-      .section-kicker {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: var(--accent);
-      }
-
-      .behavior-blocks,
-      .file-groups {
-        display: grid;
-        gap: var(--space-5);
-      }
-
-      .file-meta {
+      .code-header {
+        background: var(--surface);
+        padding: 8px 16px;
+        border-bottom: 1px solid var(--border);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--text-muted);
         display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-3);
-        margin-top: var(--space-3);
-        font-size: 0.84rem;
-        color: var(--text-soft);
-      }
-
-      .article-body {
-        display: grid;
-        gap: var(--space-4);
-        margin-top: var(--space-5);
-      }
-
-      .note {
-        padding: var(--space-4);
-        border-radius: var(--radius-sm);
-        background: var(--accent-soft);
-        border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+        justify-content: space-between;
       }
 
       pre {
         margin: 0;
+        padding: 0px 16px;
         overflow-x: auto;
-        padding: 16px 18px;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        background: var(--neutral-code);
-        color: var(--text);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        line-height: 1.4;
       }
 
-      code,
-      pre {
-        font-family: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", "Fira Code", ui-monospace, monospace;
-        font-size: 0.9rem;
-        line-height: 1.6;
-      }
+      code { font-family: inherit; }
 
       .diff-line {
         display: block;
-        padding: 0 8px;
-        border-radius: 8px;
+        padding: 0 4px;
+        margin: 0 -16px;
+        padding-left: 20px;
+        position: relative;
       }
 
-      .diff-line.add {
-        background: var(--added-bg);
-        box-shadow: inset 2px 0 0 var(--added-border);
+      .diff-line.add { background-color: var(--added-bg); color: #116329; }
+      .diff-line.remove { background-color: var(--removed-bg); color: #a0111f; }
+
+      .diff-line.add::before { content: "+"; position: absolute; left: 6px; }
+      .diff-line.remove::before { content: "-"; position: absolute; left: 6px; }
+
+      /* File List */
+      .file-group {
+        margin-bottom: 32px;
       }
 
-      .diff-line.remove {
-        background: var(--removed-bg);
-        box-shadow: inset 2px 0 0 var(--removed-border);
+      .file-header {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 8px;
       }
 
-      .verification-list {
-        margin: 0;
-        padding-left: 1.2rem;
-        display: grid;
-        gap: var(--space-3);
-      }
-
-      details {
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        background: var(--panel-muted);
-        padding: var(--space-4);
-      }
-
-      summary {
-        cursor: pointer;
+      .file-path {
+        font-family: var(--font-mono);
         font-weight: 600;
+        color: var(--text);
       }
 
-      @media (max-width: 980px) {
-        .layout {
-          grid-template-columns: 1fr;
-        }
-
-        .toc {
-          position: static;
-        }
+      .file-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        font-weight: 700;
       }
 
-      @media (max-width: 640px) {
-        .page {
-          width: min(calc(100% - 24px), var(--max));
-          padding-top: var(--space-5);
-        }
+      /* Note / Alert */
+      .alert {
+        padding: 12px 16px;
+        border-radius: var(--radius);
+        border: 1px solid #d4a72c;
+        background: #fff8c5;
+        font-size: 13px;
+        color: #735c0f;
+        margin-top: 24px;
+      }
 
-        .hero,
-        .section,
-        .file-card {
-          padding: var(--space-5);
-        }
+      /* TOC / Navigation */
+      .nav-links {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 32px;
+        font-size: 13px;
+      }
+
+      .nav-links a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      .nav-links a:hover { text-decoration: underline; }
+
+      @media (max-width: 600px) {
+        body { padding: 24px 16px; }
+        .meta-grid { grid-template-columns: 1fr 1fr; }
       }
     </style>
   </head>
   <body>
-    <main class="page">
-      <header class="hero">
-        <h1>Refine staged review output into a browser-first handoff</h1>
-        <p>
-          This page should read like a normal review document. Keep the summary crisp, keep the hierarchy obvious,
-          and let the code snippets support the explanation without turning the page into a visual concept piece.
-        </p>
-        <ul class="meta-list">
-          <li>Scope: staged changes only</li>
-          <li>Baseline: <code>HEAD</code></li>
-          <li>Generated: 2026-04-20</li>
-        </ul>
+    <main class="container">
+      <header>
+        <div class="commit-badge">commit 307fe11</div>
+        <h1>Exam Submission Hardening & Orphan Results Support</h1>
+        <div class="meta-grid">
+          <div class="meta-item"><strong>Date</strong> April 17, 2026</div>
+          <div class="meta-item"><strong>Files</strong> 4 Changed</div>
+          <div class="meta-item"><strong>Size</strong> +360 / -35</div>
+          <div class="meta-item"><strong>Status</strong> Verified</div>
+        </div>
       </header>
 
-      <div class="layout">
-        <nav class="toc" aria-label="Page sections">
-          <p class="toc-title">Contents</p>
-          <ol>
-            <li><a href="#summary">Summary</a></li>
-            <li><a href="#scope">Scope And Baseline</a></li>
-            <li><a href="#behavior">User-Visible Behavior</a></li>
-            <li><a href="#groups">File Groups And Rationale</a></li>
-            <li><a href="#verification">Verification</a></li>
-          </ol>
-        </nav>
+      <nav class="nav-links">
+        <a href="#summary">Summary</a>
+        <a href="#behavior">Behavioral Changes</a>
+        <a href="#files">File Analysis</a>
+      </nav>
 
-        <div class="content">
-          <section class="section" id="summary">
-            <div class="section-head">
-              <p class="section-kicker">Summary</p>
-              <h2>What this change set accomplishes</h2>
-            </div>
-            <p>
-              The output artifact shifts from an underspecified HTML dump to a review-oriented document with stronger
-              hierarchy, clearer prose-to-code mapping, and code snippets that are comfortable to inspect in a browser.
-            </p>
-          </section>
-
-          <section class="section" id="scope">
-            <div class="section-head">
-              <p class="section-kicker">Scope And Baseline</p>
-              <h2>What was compared</h2>
-            </div>
-            <ul class="scope-list">
-              <li>Diff source: <code>git diff --cached</code></li>
-              <li>Files: <code>.agents/skills/explainer/*</code></li>
-              <li>Perspective: reviewer-readable handoff</li>
-            </ul>
-          </section>
-
-          <section class="section" id="behavior">
-            <div class="section-head">
-              <p class="section-kicker">User-Visible Behavior</p>
-              <h2>What changes for the reviewer</h2>
-            </div>
-
-            <div class="behavior-blocks">
-              <article class="file-card">
-                <h3>Browser-ready reading experience</h3>
-                <div class="article-body">
-                  <p>
-                    The report becomes an HTML page with a sticky table of contents, stronger typography, and diff blocks
-                    that remain readable during long review sessions.
-                  </p>
-                  <div class="note">
-                    <strong>Why this block matters:</strong>
-                    It shows the visible shift from an output-path rule to a browser-first artifact with stronger review ergonomics.
-                  </div>
-                  <pre><code><span class="diff-line remove">- Write the explanation as Markdown.</span>
-<span class="diff-line add">+ Write the explanation as one self-contained HTML document with inline CSS.</span>
-<span class="diff-line add">+ Add inline JavaScript only when it materially improves navigation or review comfort.</span></code></pre>
-                </div>
-              </article>
-            </div>
-          </section>
-
-          <section class="section" id="groups">
-            <div class="section-head">
-              <p class="section-kicker">File Groups And Rationale</p>
-              <h2>How the files changed and why</h2>
-            </div>
-
-            <div class="file-groups">
-              <article class="file-card">
-                <h3><code>.agents/skills/explainer/SKILL.md</code></h3>
-                <div class="file-meta">
-                  <span>Main contract</span>
-                  <span>Output workflow</span>
-                </div>
-                <div class="article-body">
-                  <p>
-                    The skill now loads a concrete reference template before generating HTML. This reduces the chance of
-                    generic layouts and gives future runs a stable structure to follow.
-                  </p>
-                  <div class="note">
-                    <strong>Why this block matters:</strong>
-                    This hunk adds a real guardrail. The agent no longer has to improvise the visual system from scratch on every run.
-                  </div>
-                  <pre><code><span class="diff-line add">+ Read `references/review-page-template.html` before generating HTML output.</span>
-<span class="diff-line add">+ Use it as the default structure and visual target unless the user asked for a different presentation.</span></code></pre>
-                </div>
-              </article>
-
-              <article class="file-card">
-                <h3><code>.agents/skills/explainer/references/review-page-template.html</code></h3>
-                <div class="file-meta">
-                  <span>Visual sample</span>
-                  <span>Self-contained reference</span>
-                </div>
-                <div class="article-body">
-                  <p>
-                    This sample demonstrates the intended reading experience: editorial body typography, restrained accenting,
-                    sticky navigation, and code blocks with semantic diff treatment.
-                  </p>
-                  <div class="note">
-                    <strong>Why this block matters:</strong>
-                    The sample does not just say "make it nicer." It shows spacing, hierarchy, color, and code treatment concretely.
-                  </div>
-                  <pre><code><span class="diff-line add">+ &lt;nav class="toc" aria-label="Page sections"&gt;...&lt;/nav&gt;</span>
-<span class="diff-line add">+ .diff-line.add { background: var(--added-bg); }</span>
-<span class="diff-line add">+ .diff-line.remove { background: var(--removed-bg); }</span></code></pre>
-
-                  <details>
-                    <summary>Why this sample works better than generic HTML</summary>
-                    <p>
-                      It treats the page like a normal technical document instead of a marketing page: limited visual vocabulary,
-                      careful line length, readable code, and navigation that helps the reviewer move through the diff.
-                    </p>
-                  </details>
-                </div>
-              </article>
-            </div>
-          </section>
-
-          <section class="section" id="verification">
-            <div class="section-head">
-              <p class="section-kicker">Verification</p>
-              <h2>What was checked</h2>
-            </div>
-            <ul class="verification-list">
-              <li>The page is fully self-contained and browser-openable.</li>
-              <li>Diff blocks remain horizontally scrollable without breaking layout.</li>
-              <li>The hierarchy stays readable on narrow screens.</li>
-            </ul>
-          </section>
+      <section id="summary">
+        <h2>Summary</h2>
+        <div class="summary-box">
+          <p>
+            This commit strengthens the exam submission lifecycle by enforcing strict registration checks and
+            improving the robustness of the admin analysis view. Key improvements include:
+          </p>
+          <ul style="margin: 0; padding-left: 20px;">
+            <li>Server-side validation of participant registration prior to submission.</li>
+            <li>Idempotent handling of duplicate submissions to prevent inconsistent results.</li>
+            <li>Introduction of "Orphan Results" in the admin dashboard to surface data for participants
+                whose registration records have been modified or removed.</li>
+            <li>Client-side session recovery and automatic state clearing on authorization failure.</li>
+          </ul>
         </div>
-      </div>
+        <div class="alert">
+          <strong>Note:</strong> The commit message was "fix issue". Technical intent was derived from control flow analysis.
+        </div>
+      </section>
+
+      <section id="behavior">
+        <h2>Behavioral Changes</h2>
+
+        <article>
+          <h3>1. Resilient Submission Recovery</h3>
+          <p>
+            When a submission is rejected (403/404), the client now performs a graceful exit.
+            It preserves a local backup of the answers before clearing the session, preventing data loss
+            while stopping the infinite retry loop.
+          </p>
+          <div class="code-container">
+            <div class="code-header">
+              <span>client/src/pages/exam-participant.tsx</span>
+            </div>
+            <pre><code><span class="diff-line add">const errorStatus = getErrorStatusCode(error);</span><span class="diff-line add">if (errorStatus === 403 || errorStatus === 404) {</span><span class="diff-line add">  if (examSessionRef.current) {</span><span class="diff-line add">    safeSetToLocalStorage("exam-backup-answers", {</span><span class="diff-line add">      sessionId: examSessionRef.current.id,</span><span class="diff-line add">      answers: answersRef.current,</span><span class="diff-line add">      timestamp: new Date().toISOString(),</span><span class="diff-line add">      reason: "submit_exam_rejected_invalid_session"</span><span class="diff-line add">    });</span><span class="diff-line add">  }</span><span class="diff-line add">  localStorage.removeItem(EXAM_SESSION_KEY);</span><span class="diff-line add">  setCurrentStep("info");</span><span class="diff-line add">}</span></code></pre>
+          </div>
+        </article>
+
+        <article>
+          <h3>2. Orphan Result Visibility</h3>
+          <p>
+            Admins can now see results from participants who are no longer registered in the selected schedule.
+            These are flagged with an "Unregistered Result" badge and include metadata about their actual registrations.
+          </p>
+          <div class="code-container">
+            <div class="code-header">
+              <span>client/src/pages/analysis.tsx</span>
+            </div>
+            <pre><code><span class="diff-line add">{isOrphanResult && (</span><span class="diff-line add">  &lt;Badge className="bg-amber-100 text-amber-800"&gt;</span><span class="diff-line add">    Unregistered Result</span><span class="diff-line add">  &lt;/Badge&gt;</span><span class="diff-line add">)}</span><span class="diff-line add">{isOrphanResult && participant.registeredScheduleNames?.length > 0 && (</span><span class="diff-line add">  &lt;p className="text-xs text-gray-500"&gt;</span><span class="diff-line add">    Registered in: {participant.registeredScheduleNames.join(", ")}</span><span class="diff-line add">  &lt;/p&gt;</span><span class="diff-line add">)}</span></code></pre>
+          </div>
+        </article>
+      </section>
+
+      <section id="files">
+        <h2>File Analysis</h2>
+
+        <div class="file-group">
+          <div class="file-header">
+            <span class="file-path">server/routes/schedules.ts</span>
+            <span class="file-label">Critical</span>
+          </div>
+          <p>
+            Implements the "Orphan Result" synthesis logic. It merges registered participants with
+            synthetic rows derived from existing <code>examResults</code> that lack a corresponding
+            registration in the active schedule.
+          </p>
+        </div>
+
+        <div class="file-group">
+          <div class="file-header">
+            <span class="file-path">client/src/utils/examParticipantUtils.ts</span>
+            <span class="file-label">Support</span>
+          </div>
+          <p>
+            Updates the retry policy to treat 4xx status codes as terminal failures.
+            This prevents unnecessary network overhead when the server has explicitly rejected a request.
+          </p>
+        </div>
+      </section>
+
+      <footer style="margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border-muted); color: var(--text-muted); font-size: 12px; text-align: center;">
+        Automated Change Analysis &bull; April 2026
+      </footer>
     </main>
   </body>
 </html>

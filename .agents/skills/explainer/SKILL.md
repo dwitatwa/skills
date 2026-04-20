@@ -60,6 +60,8 @@ Read `../uncodixfy/SKILL.md` before generating HTML output. Treat its banned-pat
    - keep long code blocks horizontally scrollable
    - make section headings and file labels easy to scan
    - provide quick navigation across sections and files on larger screens
+   - reduce vertical sprawl by collapsing long snippets behind clear toggles when the report contains many code blocks
+   - prefer one strong document column with lightweight section dividers over an endless stack of identical cards
 17. Cite concrete file references when they help the explanation. Use the changed file paths and current line numbers where possible.
 18. After writing the file, give the user a short chat response that says where the HTML file was saved and what it covers.
 
@@ -75,6 +77,7 @@ Read `../uncodixfy/SKILL.md` before generating HTML output. Treat its banned-pat
 - Keep the HTML self-contained so it can be opened directly in a browser without extra assets.
 - Use inline CSS by default. Add inline JavaScript only when it clearly improves review ergonomics.
 - Prefer a normal technical-document layout with a clear table of contents, strong section hierarchy, and diff readability over flashy UI.
+- If the page would otherwise become a long uninterrupted scroll, add compact overview blocks and collapsible code sections so the reader can scan first and expand second.
 - Prefer plain language over diff jargon, but keep key identifiers and file references intact.
 - If the change set is mixed or noisy, say which parts are clearly related and which parts appear separate.
 - The default sample structure lives in `references/review-page-template.html`.
