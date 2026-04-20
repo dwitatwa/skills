@@ -140,6 +140,28 @@
         justify-content: space-between;
       }
 
+      .code-viewer {
+        height: 280px;
+        border-top: 0;
+      }
+
+      .code-viewer[data-state="loading"]::before,
+      .code-viewer[data-state="error"]::before {
+        display: block;
+        padding: 16px;
+        color: var(--text-muted);
+        font-family: var(--font-mono);
+        font-size: 12px;
+      }
+
+      .code-viewer[data-state="loading"]::before {
+        content: "Loading Monaco diff viewer...";
+      }
+
+      .code-viewer[data-state="error"]::before {
+        content: "Monaco diff viewer failed to load.";
+      }
+
       pre {
         margin: 0;
         padding: 0px 16px;
@@ -280,8 +302,15 @@
           <div class="code-container">
             <div class="code-header">
               <span>client/src/pages/exam-participant.tsx</span>
+              <span>Monaco Diff</span>
             </div>
-            <pre><code><span class="diff-line add">const errorStatus = getErrorStatusCode(error);</span><span class="diff-line add">if (errorStatus === 403 || errorStatus === 404) {</span><span class="diff-line add">  if (examSessionRef.current) {</span><span class="diff-line add">    safeSetToLocalStorage("exam-backup-answers", {</span><span class="diff-line add">      sessionId: examSessionRef.current.id,</span><span class="diff-line add">      answers: answersRef.current,</span><span class="diff-line add">      timestamp: new Date().toISOString(),</span><span class="diff-line add">      reason: "submit_exam_rejected_invalid_session"</span><span class="diff-line add">    });</span><span class="diff-line add">  }</span><span class="diff-line add">  localStorage.removeItem(EXAM_SESSION_KEY);</span><span class="diff-line add">  setCurrentStep("info");</span><span class="diff-line add">}</span></code></pre>
+            <div class="code-viewer" data-state="loading" data-language="typescript"></div>
+            <script type="application/json" class="diff-data">
+              {
+                "original": "",
+                "modified": "const errorStatus = getErrorStatusCode(error);\nif (errorStatus === 403 || errorStatus === 404) {\n  if (examSessionRef.current) {\n    safeSetToLocalStorage(\"exam-backup-answers\", {\n      sessionId: examSessionRef.current.id,\n      answers: answersRef.current,\n      timestamp: new Date().toISOString(),\n      reason: \"submit_exam_rejected_invalid_session\"\n    });\n  }\n  localStorage.removeItem(EXAM_SESSION_KEY);\n  setCurrentStep(\"info\");\n}"
+              }
+            </script>
           </div>
         </article>
 
@@ -294,8 +323,15 @@
           <div class="code-container">
             <div class="code-header">
               <span>client/src/pages/analysis.tsx</span>
+              <span>Monaco Diff</span>
             </div>
-            <pre><code><span class="diff-line add">{isOrphanResult && (</span><span class="diff-line add">  &lt;Badge className="bg-amber-100 text-amber-800"&gt;</span><span class="diff-line add">    Unregistered Result</span><span class="diff-line add">  &lt;/Badge&gt;</span><span class="diff-line add">)}</span><span class="diff-line add">{isOrphanResult && participant.registeredScheduleNames?.length > 0 && (</span><span class="diff-line add">  &lt;p className="text-xs text-gray-500"&gt;</span><span class="diff-line add">    Registered in: {participant.registeredScheduleNames.join(", ")}</span><span class="diff-line add">  &lt;/p&gt;</span><span class="diff-line add">)}</span></code></pre>
+            <div class="code-viewer" data-state="loading" data-language="typescript"></div>
+            <script type="application/json" class="diff-data">
+              {
+                "original": "",
+                "modified": "{isOrphanResult && (\n  <Badge className=\"bg-amber-100 text-amber-800\">\n    Unregistered Result\n  </Badge>\n)}\n{isOrphanResult && participant.registeredScheduleNames?.length > 0 && (\n  <p className=\"text-xs text-gray-500\">\n    Registered in: {participant.registeredScheduleNames.join(\", \")}\n  </p>\n)}"
+              }
+            </script>
           </div>
         </article>
       </section>
@@ -331,5 +367,60 @@
         Automated Change Analysis &bull; April 2026
       </footer>
     </main>
+
+    <script type="module">
+      import loader from "https://cdn.jsdelivr.net/npm/@monaco-editor/loader@1.5.0/+esm";
+
+      const viewerElements = Array.from(document.querySelectorAll(".code-viewer"));
+
+      loader.config({
+        paths: {
+          vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs"
+        }
+      });
+
+      try {
+        const monaco = await loader.init();
+
+        viewerElements.forEach((viewerElement) => {
+          const dataNode = viewerElement.nextElementSibling;
+          if (!dataNode || !dataNode.classList.contains("diff-data")) return;
+
+          const payload = JSON.parse(dataNode.textContent);
+          const originalModel = monaco.editor.createModel(payload.original, payload.language || viewerElement.dataset.language || "typescript");
+          const modifiedModel = monaco.editor.createModel(payload.modified, payload.language || viewerElement.dataset.language || "typescript");
+          const lineCount = Math.max(modifiedModel.getLineCount(), originalModel.getLineCount(), 4);
+          viewerElement.style.height = `${Math.min(Math.max(lineCount * 22 + 24, 180), 520)}px`;
+
+          const editor = monaco.editor.createDiffEditor(viewerElement, {
+            automaticLayout: true,
+            originalEditable: false,
+            readOnly: true,
+            renderSideBySide: false,
+            renderOverviewRuler: false,
+            minimap: { enabled: false },
+            glyphMargin: false,
+            folding: false,
+            lineNumbers: "on",
+            scrollBeyondLastLine: false,
+            wordWrap: "off",
+            diffWordWrap: "off",
+            ignoreTrimWhitespace: false
+          });
+
+          editor.setModel({
+            original: originalModel,
+            modified: modifiedModel
+          });
+
+          viewerElement.dataset.state = "ready";
+        });
+      } catch (error) {
+        console.error("Failed to initialize Monaco Diff Editor", error);
+        viewerElements.forEach((viewerElement) => {
+          viewerElement.dataset.state = "error";
+        });
+      }
+    </script>
   </body>
 </html>
