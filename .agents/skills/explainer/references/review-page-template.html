@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Change Explanation</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f8f9fa;
+        --panel: #ffffff;
+        --panel-muted: #f1f3f5;
+        --border: #d9dee3;
+        --text: #1f2328;
+        --text-soft: #57606a;
+        --accent: #2f6f49;
+        --accent-soft: #edf6f0;
+        --added-bg: #eefaf1;
+        --added-border: #8ec7a0;
+        --removed-bg: #fdf0ef;
+        --removed-border: #d7a29b;
+        --neutral-code: #f6f8fa;
+        --radius-lg: 10px;
+        --radius-md: 8px;
+        --radius-sm: 6px;
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 24px;
+        --space-6: 32px;
+        --space-7: 48px;
+        --max: 1380px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.55;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .page {
+        width: min(calc(100% - 40px), var(--max));
+        margin: 0 auto;
+        padding: var(--space-6) 0 var(--space-7);
+      }
+
+      .hero {
+        display: grid;
+        gap: var(--space-4);
+        padding: var(--space-5);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--panel);
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        line-height: 1.1;
+        font-weight: 700;
+      }
+
+      h1 {
+        max-width: 24ch;
+        font-size: 2rem;
+        letter-spacing: -0.03em;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+        letter-spacing: -0.02em;
+      }
+
+      h3 {
+        font-size: 1rem;
+      }
+
+      .hero p,
+      .section p,
+      .article-body p {
+        max-width: 72ch;
+        margin: 0;
+      }
+
+      .meta-list,
+      .scope-list {
+        margin: 0;
+        padding-left: 1.1rem;
+        display: grid;
+        gap: var(--space-2);
+        color: var(--text-soft);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+        gap: var(--space-6);
+        margin-top: var(--space-6);
+      }
+
+      .toc {
+        position: sticky;
+        top: var(--space-5);
+        align-self: start;
+        padding: var(--space-4);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--panel);
+      }
+
+      .toc-title {
+        margin: 0 0 var(--space-4);
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-soft);
+      }
+
+      .toc ol {
+        margin: 0;
+        padding-left: 1.15rem;
+        display: grid;
+        gap: var(--space-3);
+      }
+
+      .toc a {
+        text-decoration: none;
+      }
+
+      .content {
+        display: grid;
+        gap: var(--space-5);
+      }
+
+      .section,
+      .file-card {
+        padding: var(--space-5);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--panel);
+      }
+
+      .section-head {
+        display: grid;
+        gap: var(--space-3);
+        margin-bottom: var(--space-5);
+      }
+
+      .section-kicker {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--accent);
+      }
+
+      .behavior-blocks,
+      .file-groups {
+        display: grid;
+        gap: var(--space-5);
+      }
+
+      .file-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        margin-top: var(--space-3);
+        font-size: 0.84rem;
+        color: var(--text-soft);
+      }
+
+      .article-body {
+        display: grid;
+        gap: var(--space-4);
+        margin-top: var(--space-5);
+      }
+
+      .note {
+        padding: var(--space-4);
+        border-radius: var(--radius-sm);
+        background: var(--accent-soft);
+        border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+      }
+
+      pre {
+        margin: 0;
+        overflow-x: auto;
+        padding: 16px 18px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--neutral-code);
+        color: var(--text);
+      }
+
+      code,
+      pre {
+        font-family: "SFMono-Regular", "JetBrains Mono", "Cascadia Code", "Fira Code", ui-monospace, monospace;
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      .diff-line {
+        display: block;
+        padding: 0 8px;
+        border-radius: 8px;
+      }
+
+      .diff-line.add {
+        background: var(--added-bg);
+        box-shadow: inset 2px 0 0 var(--added-border);
+      }
+
+      .diff-line.remove {
+        background: var(--removed-bg);
+        box-shadow: inset 2px 0 0 var(--removed-border);
+      }
+
+      .verification-list {
+        margin: 0;
+        padding-left: 1.2rem;
+        display: grid;
+        gap: var(--space-3);
+      }
+
+      details {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--panel-muted);
+        padding: var(--space-4);
+      }
+
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .toc {
+          position: static;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page {
+          width: min(calc(100% - 24px), var(--max));
+          padding-top: var(--space-5);
+        }
+
+        .hero,
+        .section,
+        .file-card {
+          padding: var(--space-5);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <h1>Refine staged review output into a browser-first handoff</h1>
+        <p>
+          This page should read like a normal review document. Keep the summary crisp, keep the hierarchy obvious,
+          and let the code snippets support the explanation without turning the page into a visual concept piece.
+        </p>
+        <ul class="meta-list">
+          <li>Scope: staged changes only</li>
+          <li>Baseline: <code>HEAD</code></li>
+          <li>Generated: 2026-04-20</li>
+        </ul>
+      </header>
+
+      <div class="layout">
+        <nav class="toc" aria-label="Page sections">
+          <p class="toc-title">Contents</p>
+          <ol>
+            <li><a href="#summary">Summary</a></li>
+            <li><a href="#scope">Scope And Baseline</a></li>
+            <li><a href="#behavior">User-Visible Behavior</a></li>
+            <li><a href="#groups">File Groups And Rationale</a></li>
+            <li><a href="#verification">Verification</a></li>
+          </ol>
+        </nav>
+
+        <div class="content">
+          <section class="section" id="summary">
+            <div class="section-head">
+              <p class="section-kicker">Summary</p>
+              <h2>What this change set accomplishes</h2>
+            </div>
+            <p>
+              The output artifact shifts from an underspecified HTML dump to a review-oriented document with stronger
+              hierarchy, clearer prose-to-code mapping, and code snippets that are comfortable to inspect in a browser.
+            </p>
+          </section>
+
+          <section class="section" id="scope">
+            <div class="section-head">
+              <p class="section-kicker">Scope And Baseline</p>
+              <h2>What was compared</h2>
+            </div>
+            <ul class="scope-list">
+              <li>Diff source: <code>git diff --cached</code></li>
+              <li>Files: <code>.agents/skills/explainer/*</code></li>
+              <li>Perspective: reviewer-readable handoff</li>
+            </ul>
+          </section>
+
+          <section class="section" id="behavior">
+            <div class="section-head">
+              <p class="section-kicker">User-Visible Behavior</p>
+              <h2>What changes for the reviewer</h2>
+            </div>
+
+            <div class="behavior-blocks">
+              <article class="file-card">
+                <h3>Browser-ready reading experience</h3>
+                <div class="article-body">
+                  <p>
+                    The report becomes an HTML page with a sticky table of contents, stronger typography, and diff blocks
+                    that remain readable during long review sessions.
+                  </p>
+                  <div class="note">
+                    <strong>Why this block matters:</strong>
+                    It shows the visible shift from an output-path rule to a browser-first artifact with stronger review ergonomics.
+                  </div>
+                  <pre><code><span class="diff-line remove">- Write the explanation as Markdown.</span>
+<span class="diff-line add">+ Write the explanation as one self-contained HTML document with inline CSS.</span>
+<span class="diff-line add">+ Add inline JavaScript only when it materially improves navigation or review comfort.</span></code></pre>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="section" id="groups">
+            <div class="section-head">
+              <p class="section-kicker">File Groups And Rationale</p>
+              <h2>How the files changed and why</h2>
+            </div>
+
+            <div class="file-groups">
+              <article class="file-card">
+                <h3><code>.agents/skills/explainer/SKILL.md</code></h3>
+                <div class="file-meta">
+                  <span>Main contract</span>
+                  <span>Output workflow</span>
+                </div>
+                <div class="article-body">
+                  <p>
+                    The skill now loads a concrete reference template before generating HTML. This reduces the chance of
+                    generic layouts and gives future runs a stable structure to follow.
+                  </p>
+                  <div class="note">
+                    <strong>Why this block matters:</strong>
+                    This hunk adds a real guardrail. The agent no longer has to improvise the visual system from scratch on every run.
+                  </div>
+                  <pre><code><span class="diff-line add">+ Read `references/review-page-template.html` before generating HTML output.</span>
+<span class="diff-line add">+ Use it as the default structure and visual target unless the user asked for a different presentation.</span></code></pre>
+                </div>
+              </article>
+
+              <article class="file-card">
+                <h3><code>.agents/skills/explainer/references/review-page-template.html</code></h3>
+                <div class="file-meta">
+                  <span>Visual sample</span>
+                  <span>Self-contained reference</span>
+                </div>
+                <div class="article-body">
+                  <p>
+                    This sample demonstrates the intended reading experience: editorial body typography, restrained accenting,
+                    sticky navigation, and code blocks with semantic diff treatment.
+                  </p>
+                  <div class="note">
+                    <strong>Why this block matters:</strong>
+                    The sample does not just say "make it nicer." It shows spacing, hierarchy, color, and code treatment concretely.
+                  </div>
+                  <pre><code><span class="diff-line add">+ &lt;nav class="toc" aria-label="Page sections"&gt;...&lt;/nav&gt;</span>
+<span class="diff-line add">+ .diff-line.add { background: var(--added-bg); }</span>
+<span class="diff-line add">+ .diff-line.remove { background: var(--removed-bg); }</span></code></pre>
+
+                  <details>
+                    <summary>Why this sample works better than generic HTML</summary>
+                    <p>
+                      It treats the page like a normal technical document instead of a marketing page: limited visual vocabulary,
+                      careful line length, readable code, and navigation that helps the reviewer move through the diff.
+                    </p>
+                  </details>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="section" id="verification">
+            <div class="section-head">
+              <p class="section-kicker">Verification</p>
+              <h2>What was checked</h2>
+            </div>
+            <ul class="verification-list">
+              <li>The page is fully self-contained and browser-openable.</li>
+              <li>Diff blocks remain horizontally scrollable without breaking layout.</li>
+              <li>The hierarchy stays readable on narrow screens.</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

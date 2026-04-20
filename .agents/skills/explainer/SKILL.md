@@ -7,6 +7,9 @@ description: Use this skill when the user needs to explain an existing set of fi
 
 Explain existing file changes from the clearest available baseline and write the result to a self-contained HTML file that is comfortable to read in a browser without turning it into a code review or a line-by-line diff dump.
 
+Read `references/review-page-template.html` before generating HTML output. Use it as the default structure and visual target unless the user asked for a different presentation.
+Read `../uncodixfy/SKILL.md` before generating HTML output. Treat its banned-pattern list as a hard constraint for the review page.
+
 ## Default workflow
 
 1. Identify the scope first. If the user names files, commits, or a diff source, stay within that boundary. If the user means "the changes you just made", prioritize the files touched in the current turn. Otherwise, prefer the current workspace changes relative to `HEAD`.
@@ -31,89 +34,50 @@ Explain existing file changes from the clearest available baseline and write the
    - otherwise, write into a default `explain/` folder in the working tree root with a descriptive name such as `explain/staged-change-explanation.html`, `explain/unstaged-change-explanation.html`, or `explain/change-explanation.html`
    - create the `explain/` folder if it does not exist
    - if that default file already exists and the user did not ask to overwrite it, create a nearby unique name instead of replacing the existing file silently
-9. Write the explanation as one self-contained HTML document with inline CSS. Add inline JavaScript only when it materially improves navigation or review comfort, such as collapsible sections for long diffs.
-10. Structure the page with a readable title, summary, scope or baseline used, `User-Visible Behavior`, `File Groups And Rationale`, and verification context when available.
-11. Put the changed code inside those narrative sections, not in a separate catch-all code section:
+9. Read `references/review-page-template.html` and reuse its information architecture, inline CSS patterns, and section structure as the default starting point.
+10. Write the explanation as one self-contained HTML document with inline CSS. Add inline JavaScript only when it materially improves navigation or review comfort, such as collapsible sections, "expand all" controls, or section filtering for long diffs.
+11. Structure the page with a readable title, summary, scope or baseline used, `User-Visible Behavior`, `File Groups And Rationale`, and verification context when available.
+12. Keep the page visually restrained and review-oriented:
+   - prefer a light theme by default for long-form code reading unless the user asked for dark mode
+   - use simple sans-serif UI typography for prose and dedicated monospace only for code
+   - make the page feel like a normal review document, not a landing page, dashboard, or AI-generated poster
+   - avoid eyebrow labels, hero-style intros, pill badges, oversized radii, floating panels, decorative gradients, glassy cards, loud glow effects, and decorative UI that competes with the diff
+   - prefer straightforward sections, borders, spacing, and subtle hover or disclosure behavior over visual theatrics
+13. Put the changed code inside those narrative sections, not in a separate catch-all code section:
    - place behavior-relevant hunks under `User-Visible Behavior`
    - place file-specific hunks or snippets under `File Groups And Rationale`
-12. For each changed file or file group, include the relevant code that changed:
+14. For each changed file or file group, include the relevant code that changed:
    - prefer HTML `<pre><code>` blocks that preserve diff formatting for modified tracked files
    - use language-labeled code blocks or clearly titled code sections for new files or when a focused snippet is clearer than raw diff format
    - keep enough surrounding context for a reviewer to understand the change, but do not dump an entire large file when only one hunk matters
-13. Add a short explanation for each code block:
+15. Add a short explanation for each code block:
    - explain what that specific hunk or snippet changes
    - say why that block matters to behavior, flow, config, or tests when the reason is supported by the diff or surrounding context
    - keep the explanation attached to the block it describes so reviewers do not need to infer which prose belongs to which snippet
-14. Make the HTML comfortable to read directly in a browser:
+16. Make the HTML comfortable to read directly in a browser:
    - use clean typography and spacing
    - visually separate added, removed, and unchanged lines
    - keep long code blocks horizontally scrollable
    - make section headings and file labels easy to scan
-15. Cite concrete file references when they help the explanation. Use the changed file paths and current line numbers where possible.
-16. After writing the file, give the user a short chat response that says where the HTML file was saved and what it covers.
+   - provide quick navigation across sections and files on larger screens
+17. Cite concrete file references when they help the explanation. Use the changed file paths and current line numbers where possible.
+18. After writing the file, give the user a short chat response that says where the HTML file was saved and what it covers.
 
 ## Output guidance
 
 - The primary result is an HTML file, not only a chat reply.
+- Use `references/review-page-template.html` as the default sample to follow, not as decoration to copy blindly. Adapt the content while preserving the reading comfort and hierarchy.
+- Use `../uncodixfy/SKILL.md` as a negative filter while shaping the HTML. If the page starts looking like a generic AI dashboard, simplify it immediately.
 - Lead with a short summary of what the change set accomplishes.
 - Use `User-Visible Behavior` for externally observable changes and include the most relevant changed code directly in that section.
 - Use `File Groups And Rationale` for grouped file explanations and include the supporting changed code directly under each file or file group.
 - Add a short block-specific explanation immediately before or after each code block so the reviewer can understand that exact snippet without reading the whole file first.
 - Keep the HTML self-contained so it can be opened directly in a browser without extra assets.
 - Use inline CSS by default. Add inline JavaScript only when it clearly improves review ergonomics.
+- Prefer a normal technical-document layout with a clear table of contents, strong section hierarchy, and diff readability over flashy UI.
 - Prefer plain language over diff jargon, but keep key identifiers and file references intact.
 - If the change set is mixed or noisy, say which parts are clearly related and which parts appear separate.
-- Use a compact structure like:
-
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Change Explanation</title>
-    <style>
-      /* Inline styles for layout, typography, and diff readability */
-    </style>
-  </head>
-  <body>
-    <main>
-      <section>
-        <h1>Change Explanation</h1>
-      </section>
-
-      <section>
-        <h2>Summary</h2>
-      </section>
-
-      <section>
-        <h2>Scope And Baseline</h2>
-      </section>
-
-      <section>
-        <h2>User-Visible Behavior</h2>
-        <p>The user-facing effect of the change.</p>
-        <p><strong>Why this block matters:</strong> This hunk changes the visible behavior by rejecting empty values earlier.</p>
-        <pre><code>- old behavior line
-+ new behavior line</code></pre>
-      </section>
-
-      <section>
-        <h2>File Groups And Rationale</h2>
-        <article>
-          <h3>path/to/file.ts</h3>
-          <p>This block moves the guard clause higher so the rest of the function only runs on valid input.</p>
-          <pre><code>- old line
-+ new line</code></pre>
-        </article>
-      </section>
-
-      <section>
-        <h2>Verification</h2>
-      </section>
-    </main>
-  </body>
-</html>
-```
+- The default sample structure lives in `references/review-page-template.html`.
 
 ## Gotchas
 
